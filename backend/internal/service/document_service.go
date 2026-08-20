@@ -39,7 +39,7 @@ func (s *DocumentService) Create(applicationID uint, docType, title, content str
 		if err := s.docRepo.CreateTx(tx, d); err != nil {
 			return fmt.Errorf("document create: %w", err)
 		}
-		if err := s.verRepo.CreateTx(tx, &model.DocumentVersion{DocumentID: d.ID, Content: content, VersionNo: 1, ChangeSummary: "初始版本"}); err != nil {
+		if err := s.verRepo.CreateTx(tx, &model.DocumentVersion{DocumentID: d.ID, Content: content, VersionNo: 0, ChangeSummary: "初始版本"}); err != nil {
 			return fmt.Errorf("document initial version create: %w", err)
 		}
 		return nil
@@ -63,7 +63,7 @@ func (s *DocumentService) Save(id uint, content, changeSummary string) (*model.D
 	}
 	d.Content = content
 	d.CurrentVersion++
-	v := &model.DocumentVersion{DocumentID: id, Content: content, VersionNo: d.CurrentVersion, ChangeSummary: changeSummary}
+	v := &model.DocumentVersion{DocumentID: id, Content: content, VersionNo: d.CurrentVersion - 1, ChangeSummary: changeSummary}
 	err = s.db.Transaction(func(tx *gorm.DB) error {
 		if err := s.docRepo.UpdateTx(tx, d); err != nil {
 			return fmt.Errorf("document save update: %w", err)
