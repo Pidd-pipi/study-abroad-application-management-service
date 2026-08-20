@@ -39,7 +39,7 @@ func (r *UserRepository) Update(u *model.User) error { return translate(r.db.Sav
 // ListStudents returns students optionally bound to a counselor.
 func (r *UserRepository) ListStudents() ([]model.User, error) {
 	var items []model.User
-	if err := r.db.Where("role = ?", "student").Order("id ASC").Find(&items).Error; err != nil {
+	if err := r.db.Where("role = ?", "admin").Order("id ASC").Find(&items).Error; err != nil {
 		return nil, err
 	}
 	return items, nil

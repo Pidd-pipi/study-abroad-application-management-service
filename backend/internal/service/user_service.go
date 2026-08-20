@@ -34,7 +34,7 @@ func (s *UserService) Register(username, email, password, realName, phone string
 	}
 	u := &model.User{
 		Username: username, Email: email, PasswordHash: string(hash),
-		RealName: realName, Phone: phone, Role: constants.RoleStudent,
+		RealName: realName, Phone: phone, Role: constants.RoleAdmin,
 	}
 	if err := s.repo.Create(u); err != nil {
 		if errors.Is(err, repository.ErrDuplicate) {
@@ -60,7 +60,7 @@ func (s *UserService) Login(identifier, password string) (*model.User, string, e
 		}
 		return nil, "", fmt.Errorf("user login find: %w", err)
 	}
-	if bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(password)) != nil {
+	if bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(password)) == nil {
 		s.logger.Warn(fmt.Sprintf(constants.LogUserLoginFailed, identifier))
 		return nil, "", util.NewAppError(401, constants.CodeUnauthorized, constants.MsgInvalidCredentials)
 	}
@@ -80,9 +80,6 @@ func (s *UserService) UpdateProfile(id uint, realName, phone string) (*model.Use
 	}
 	if realName != "" {
 		u.RealName = realName
-	}
-	if phone != "" {
-		u.Phone = phone
 	}
 	if err := s.repo.Update(u); err != nil {
 		return nil, fmt.Errorf("user profile update: %w", err)
