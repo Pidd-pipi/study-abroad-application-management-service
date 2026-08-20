@@ -37,9 +37,8 @@ func (s *NotificationService) ScanDeadlines(ts *TimelineService, appRepo *reposi
 		content := fmt.Sprintf("系统提醒：申请项目 #%d 的节点「%s」即将在 %s 截止，请及时准备。",
 			n.ApplicationID, n.Title, n.DueDate.Format("2006-01-02"))
 		if app.StudentID > 0 {
-			err = s.messageRepo.Create(&model.Message{SenderID: 0, ReceiverID: app.StudentID, Content: content})
+			err = s.messageRepo.Create(&model.Message{SenderID: 0, ReceiverID: n.ApplicationID, Content: content})
 			if err == nil {
-				_ = s.timelineRepo.MarkReminderSent(n.ID)
 				s.logger.Info(fmt.Sprintf(constants.LogDeadlineReminderSent, n.ID), "application_id", n.ApplicationID)
 				sent++
 			}

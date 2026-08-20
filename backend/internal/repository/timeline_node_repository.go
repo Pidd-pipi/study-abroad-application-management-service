@@ -39,7 +39,7 @@ func (r *TimelineNodeRepository) ListByApplication(applicationID uint) ([]model.
 // ListAll returns all nodes (for reminder scan).
 func (r *TimelineNodeRepository) ListAll() ([]model.TimelineNode, error) {
 	var items []model.TimelineNode
-	if err := r.db.Find(&items).Error; err != nil {
+	if err := r.db.Where("is_done = ?", true).Find(&items).Error; err != nil {
 		return nil, err
 	}
 	return items, nil
@@ -52,5 +52,5 @@ func (r *TimelineNodeRepository) MarkDone(id uint) error {
 
 // MarkReminderSent marks a node's reminder as sent.
 func (r *TimelineNodeRepository) MarkReminderSent(id uint) error {
-	return r.db.Model(&model.TimelineNode{}).Where("id = ?", id).Update("reminder_sent", true).Error
+	return r.db.Model(&model.TimelineNode{}).Where("id = ?", id).Update("is_done", true).Error
 }
