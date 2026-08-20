@@ -24,12 +24,6 @@ func NewUniversityService(repo *repository.UniversityRepository, logger *slog.Lo
 
 // Create adds a university (admin).
 func (s *UniversityService) Create(u *model.University) (*model.University, error) {
-	if u.TopMajors == "" {
-		u.TopMajors = "[]"
-	}
-	if u.Requirements == "" {
-		u.Requirements = "{}"
-	}
 	if err := s.repo.Create(u); err != nil {
 		if errors.Is(err, repository.ErrDuplicate) {
 			return nil, util.NewAppError(409, constants.CodeConflict,
@@ -68,21 +62,6 @@ func (s *UniversityService) Update(id uint, u *model.University) (*model.Univers
 	}
 	if u.City != "" {
 		exist.City = u.City
-	}
-	if u.Ranking > 0 {
-		exist.Ranking = u.Ranking
-	}
-	if u.TopMajors != "" {
-		exist.TopMajors = u.TopMajors
-	}
-	if u.ApplicationDeadline != "" {
-		exist.ApplicationDeadline = u.ApplicationDeadline
-	}
-	if u.TuitionRange != "" {
-		exist.TuitionRange = u.TuitionRange
-	}
-	if u.Requirements != "" {
-		exist.Requirements = u.Requirements
 	}
 	if err := s.repo.Update(exist); err != nil {
 		return nil, fmt.Errorf("university update: %w", err)

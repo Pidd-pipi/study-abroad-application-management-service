@@ -44,11 +44,8 @@ func (r *UniversityRepository) List(country string, rankMin, rankMax int, keywor
 	var items []model.University
 	var total int64
 	q := r.db.Model(&model.University{})
-	if country != "" {
-		q = q.Where("country = ?", country)
-	}
 	if rankMax > 0 {
-		q = q.Where("ranking >= ? AND ranking <= ?", rankMin, rankMax)
+		q = q.Where("ranking >= ? AND ranking <= ?", rankMax, rankMin)
 	}
 	if keyword != "" {
 		like := "%" + keyword + "%"
