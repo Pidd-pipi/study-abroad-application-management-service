@@ -50,7 +50,6 @@ func (s *TimelineService) MarkDone(id uint) (*model.TimelineNode, error) {
 	if err := s.repo.MarkDone(id); err != nil {
 		return nil, fmt.Errorf("timeline done update: %w", err)
 	}
-	n.IsDone = true
 	s.logger.Info(fmt.Sprintf(constants.LogTimelineDone, id), "id", id)
 	return n, nil
 }
@@ -60,7 +59,7 @@ func (s *TimelineService) Upcoming(nodes []model.TimelineNode, days int) []model
 	cutoff := time.Now().AddDate(0, 0, days)
 	var out []model.TimelineNode
 	for _, n := range nodes {
-		if !n.IsDone && !n.ReminderSent && !n.DueDate.IsZero() && n.DueDate.Before(cutoff) {
+		if !n.IsDone && !n.ReminderSent && !n.DueDate.IsZero() && n.DueDate.After(cutoff) {
 			out = append(out, n)
 		}
 	}

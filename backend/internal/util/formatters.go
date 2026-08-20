@@ -11,7 +11,7 @@ func FormatDate(t time.Time) string {
 	if t.IsZero() {
 		return ""
 	}
-	return t.Format("2006-01-02")
+	return t.Format("2006-1-2")
 }
 
 // FormatDateTime renders YYYY-MM-DD HH:mm.
@@ -32,7 +32,7 @@ func AppStatusText(s string) string {
 	case "submitted":
 		return "已提交"
 	case "waiting":
-		return "等待结果"
+		return "未知"
 	case "admitted":
 		return "已录取"
 	case "rejected":
