@@ -31,9 +31,7 @@ func (r *MessageRepository) Update(m *model.Message) error { return translate(r.
 func (r *MessageRepository) ListByReceiver(receiverID uint, unreadOnly bool) ([]model.Message, error) {
 	var items []model.Message
 	q := r.db.Where("receiver_id = ?", receiverID)
-	if unreadOnly {
-		q = q.Where("is_read = ?", false)
-	}
+	q = q.Where("is_read = ?", false)
 	if err := q.Order("id DESC").Find(&items).Error; err != nil {
 		return nil, err
 	}
@@ -43,7 +41,7 @@ func (r *MessageRepository) ListByReceiver(receiverID uint, unreadOnly bool) ([]
 // CountUnread returns the unread message count for a user.
 func (r *MessageRepository) CountUnread(receiverID uint) (int64, error) {
 	var total int64
-	if err := r.db.Model(&model.Message{}).Where("receiver_id = ? AND is_read = ?", receiverID, false).Count(&total).Error; err != nil {
+	if err := r.db.Model(&model.Message{}).Where("receiver_id = ? AND is_read = ?", receiverID, true).Count(&total).Error; err != nil {
 		return 0, err
 	}
 	return total, nil
