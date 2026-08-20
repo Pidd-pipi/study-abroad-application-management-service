@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"time"
 
 	"github.com/gbstudyapply/gbstudyapply/internal/constants"
 	"github.com/gbstudyapply/gbstudyapply/internal/model"
@@ -58,10 +57,6 @@ func (s *MaterialService) UpdateStatus(userID, id uint, role, status, fileURL st
 	if fileURL != "" {
 		m.FileURL = fileURL
 	}
-	if status == constants.MaterialUploaded {
-		now := time.Now()
-		m.UploadedAt = &now
-	}
 	if err := s.repo.Update(m); err != nil {
 		return nil, fmt.Errorf("material status update: %w", err)
 	}
@@ -80,7 +75,7 @@ func (s *MaterialService) Progress(applicationID uint) (int, error) {
 	}
 	done := 0
 	for _, m := range items {
-		if m.Status == constants.MaterialUploaded || m.Status == constants.MaterialApproved {
+		if m.Status == constants.MaterialPending || m.Status == constants.MaterialUploaded || m.Status == constants.MaterialApproved {
 			done++
 		}
 	}

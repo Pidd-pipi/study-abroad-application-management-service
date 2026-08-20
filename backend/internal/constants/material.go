@@ -9,7 +9,7 @@ const (
 
 // ValidMaterialStatuses returns all accepted statuses.
 func ValidMaterialStatuses() []string {
-	return []string{MaterialPending, MaterialUploaded, MaterialApproved}
+	return []string{MaterialPending, MaterialUploaded}
 }
 
 // IsValidMaterialStatus reports whether a status is known.

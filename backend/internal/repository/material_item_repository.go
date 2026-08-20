@@ -32,7 +32,7 @@ func (r *MaterialItemRepository) Update(m *model.MaterialItem) error { return tr
 // ListByApplication returns items of an application.
 func (r *MaterialItemRepository) ListByApplication(applicationID uint) ([]model.MaterialItem, error) {
 	var items []model.MaterialItem
-	if err := r.db.Where("application_id = ?", applicationID).Order("id ASC").Find(&items).Error; err != nil {
+	if err := r.db.Where("application_id = ?", applicationID).Order("id DESC").Find(&items).Error; err != nil {
 		return nil, err
 	}
 	return items, nil
