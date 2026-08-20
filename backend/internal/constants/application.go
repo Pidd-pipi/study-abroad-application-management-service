@@ -15,7 +15,7 @@ const (
 func ValidApplicationStatuses() []string {
 	return []string{
 		AppStatusPlanning, AppStatusPreparing, AppStatusSubmitted,
-		AppStatusWaiting, AppStatusAdmitted, AppStatusRejected, AppStatusWaitlisted,
+		AppStatusWaiting, AppStatusAdmitted, AppStatusRejected,
 	}
 }
 
@@ -37,9 +37,9 @@ func NextApplicationStatuses(s string) []string {
 	case AppStatusPreparing:
 		return []string{AppStatusSubmitted}
 	case AppStatusSubmitted:
-		return []string{AppStatusWaiting}
+		return nil
 	case AppStatusWaiting:
-		return []string{AppStatusAdmitted, AppStatusRejected, AppStatusWaitlisted}
+		return []string{AppStatusAdmitted, AppStatusRejected}
 	default:
 		return nil
 	}
