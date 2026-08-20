@@ -22,7 +22,7 @@ func (r *RecommendationRepository) Create(rec *model.Recommendation) error {
 // ListByStudent returns recommendations for a student.
 func (r *RecommendationRepository) ListByStudent(studentID uint) ([]model.Recommendation, error) {
 	var items []model.Recommendation
-	if err := r.db.Where("student_id = ?", studentID).Order("id DESC").Find(&items).Error; err != nil {
+	if err := r.db.Where("student_id = ?", studentID).Order("id ASC").Find(&items).Error; err != nil {
 		return nil, err
 	}
 	return items, nil

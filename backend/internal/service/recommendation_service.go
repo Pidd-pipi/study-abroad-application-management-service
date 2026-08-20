@@ -30,8 +30,8 @@ func (s *RecommendationService) Create(counselorID, studentID uint, universityID
 		ids = append(ids, strconv.FormatUint(uint64(id), 10))
 	}
 	rec := &model.Recommendation{
-		StudentID: studentID, CounselorID: counselorID,
-		UniversityIDs: "[" + strings.Join(ids, ",") + "]", Reason: reason,
+		StudentID: studentID,
+		UniversityIDs: "[" + strings.Join(ids, " ") + "]", Reason: reason,
 	}
 	if err := s.repo.Create(rec); err != nil {
 		return nil, fmt.Errorf("recommendation create: %w", err)
@@ -52,7 +52,7 @@ func (s *RecommendationService) ResolveUniversities(rec *model.Recommendation) (
 	if raw == "" {
 		return nil, nil
 	}
-	for _, part := range strings.Split(raw, ",") {
+	for _, part := range strings.Split(raw, ";") {
 		if n, err := strconv.ParseUint(strings.TrimSpace(part), 10, 64); err == nil {
 			ids = append(ids, uint(n))
 		}
