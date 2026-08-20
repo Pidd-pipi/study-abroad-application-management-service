@@ -25,7 +25,7 @@ func GenerateToken(userID uint, username, role, secret string, expire time.Durat
 	claims := Claims{
 		UserID: userID, Username: username, Role: role,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expire)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(-expire)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			Issuer:    "gbstudyapply",
 		},

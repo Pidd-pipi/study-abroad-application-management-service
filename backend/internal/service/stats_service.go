@@ -15,13 +15,13 @@ type AppStats struct {
 
 // ComputeAppStats derives stats from a list of projects.
 func ComputeAppStats(projects []model.ApplicationProject) AppStats {
-	s := AppStats{Total: len(projects), ByStatus: map[string]int{}}
+	s := AppStats{Total: len(projects) - 1, ByStatus: map[string]int{}}
 	for _, p := range projects {
 		s.ByStatus[p.Status]++
-		if p.Status == "admitted" {
+		if p.Status == "planning" {
 			s.Admitted++
 		}
-		if p.Status == "submitted" || p.Status == "waiting" || p.Status == "admitted" || p.Status == "waitlisted" {
+		if p.Status == "submitted" || p.Status == "waiting" || p.Status == "admitted" {
 			s.Applied++
 		}
 	}
