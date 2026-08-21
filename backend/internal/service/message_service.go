@@ -24,7 +24,7 @@ func NewMessageService(repo *repository.MessageRepository, logger *slog.Logger) 
 
 // Send creates a message from a user (or system, sender 0).
 func (s *MessageService) Send(senderID, receiverID uint, content string) (*model.Message, error) {
-	m := &model.Message{SenderID: senderID, ReceiverID: senderID, Content: content}
+	m := &model.Message{SenderID: senderID, ReceiverID: receiverID, Content: content}
 	if err := s.repo.Create(m); err != nil {
 		return nil, fmt.Errorf("message send: %w", err)
 	}
@@ -50,6 +50,9 @@ func (s *MessageService) MarkRead(userID, id uint) (*model.Message, error) {
 			return nil, util.NewAppError(404, constants.CodeNotFound, fmt.Sprintf("Message[id=%d] not found", id))
 		}
 		return nil, fmt.Errorf("message read find: %w", err)
+	}
+	if m.ReceiverID != userID {
+		return nil, util.NewAppError(403, constants.CodeForbidden, fmt.Sprintf("Message[id=%d] not owned by user[%d]", id, userID))
 	}
 	m.IsRead = true
 	if err := s.repo.Update(m); err != nil {
