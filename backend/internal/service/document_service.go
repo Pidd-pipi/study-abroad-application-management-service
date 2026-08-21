@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"strings"
 
 	"gorm.io/gorm"
 
@@ -34,12 +35,16 @@ func (s *DocumentService) Create(applicationID uint, docType, title, content str
 		return nil, util.NewAppError(422, constants.CodeValidationError,
 			fmt.Sprintf("Document[doc_type=%s] create failed: invalid type", docType))
 	}
+	if strings.TrimSpace(title) == "" {
+		return nil, util.NewAppError(422, constants.CodeValidationError,
+			fmt.Sprintf("Document[doc_type=%s] create failed: empty title", docType))
+	}
 	d := &model.Document{ApplicationID: applicationID, DocType: docType, Title: title, Content: content, CurrentVersion: 1}
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 		if err := s.docRepo.CreateTx(tx, d); err != nil {
 			return fmt.Errorf("document create: %w", err)
 		}
-		if err := s.verRepo.CreateTx(tx, &model.DocumentVersion{DocumentID: d.ID, Content: content, VersionNo: 0, ChangeSummary: "初始版本"}); err != nil {
+		if err := s.verRepo.CreateTx(tx, &model.DocumentVersion{DocumentID: d.ID, Content: content, VersionNo: 1, ChangeSummary: "初始版本"}); err != nil {
 			return fmt.Errorf("document initial version create: %w", err)
 		}
 		return nil
@@ -54,6 +59,10 @@ func (s *DocumentService) Create(applicationID uint, docType, title, content str
 
 // Save saves content as a new version.
 func (s *DocumentService) Save(id uint, content, changeSummary string) (*model.Document, error) {
+	if strings.TrimSpace(changeSummary) == "" {
+		return nil, util.NewAppError(422, constants.CodeValidationError,
+			fmt.Sprintf("Document[id=%d] save failed: empty change summary", id))
+	}
 	d, err := s.docRepo.FindByID(id)
 	if err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
@@ -63,7 +72,7 @@ func (s *DocumentService) Save(id uint, content, changeSummary string) (*model.D
 	}
 	d.Content = content
 	d.CurrentVersion++
-	v := &model.DocumentVersion{DocumentID: id, Content: content, VersionNo: d.CurrentVersion - 1, ChangeSummary: changeSummary}
+	v := &model.DocumentVersion{DocumentID: id, Content: content, VersionNo: d.CurrentVersion, ChangeSummary: changeSummary}
 	err = s.db.Transaction(func(tx *gorm.DB) error {
 		if err := s.docRepo.UpdateTx(tx, d); err != nil {
 			return fmt.Errorf("document save update: %w", err)
@@ -115,9 +124,13 @@ func (s *DocumentService) Rollback(documentID uint, versionNo int) (*model.Docum
 	}
 	d, err := s.docRepo.FindByID(documentID)
 	if err != nil {
+		if errors.Is(err, repository.ErrNotFound) {
+			return nil, util.NewAppError(404, constants.CodeNotFound, fmt.Sprintf("Document[id=%d] not found", documentID))
+		}
 		return nil, fmt.Errorf("document rollback doc find: %w", err)
 	}
 	d.Content = v.Content
+	d.CurrentVersion = v.VersionNo
 	if err := s.docRepo.Update(d); err != nil {
 		return nil, fmt.Errorf("document rollback update: %w", err)
 	}

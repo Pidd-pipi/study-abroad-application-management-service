@@ -27,7 +27,7 @@ func (r *DocumentVersionRepository) CreateTx(tx *gorm.DB, v *model.DocumentVersi
 // ListByDocument returns versions of a document ordered by version number desc.
 func (r *DocumentVersionRepository) ListByDocument(documentID uint) ([]model.DocumentVersion, error) {
 	var items []model.DocumentVersion
-	if err := r.db.Where("document_id = ?", documentID).Order("version_no ASC").Find(&items).Error; err != nil {
+	if err := r.db.Where("document_id = ?", documentID).Order("version_no DESC").Find(&items).Error; err != nil {
 		return nil, err
 	}
 	return items, nil
