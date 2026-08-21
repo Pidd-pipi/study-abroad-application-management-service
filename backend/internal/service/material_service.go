@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/gbstudyapply/gbstudyapply/internal/constants"
 	"github.com/gbstudyapply/gbstudyapply/internal/model"
@@ -46,6 +47,11 @@ func (s *MaterialService) UpdateStatus(userID, id uint, role, status, fileURL st
 		return nil, util.NewAppError(422, constants.CodeValidationError,
 			fmt.Sprintf("MaterialItem[id=%d] status=%s invalid", id, status))
 	}
+	// Uploading a file requires a non-empty URL and records the upload time.
+	if status == constants.MaterialUploaded && fileURL == "" {
+		return nil, util.NewAppError(422, constants.CodeValidationError,
+			fmt.Sprintf("MaterialItem[id=%d] status=%s file_url required", id, status))
+	}
 	m, err := s.repo.FindByID(id)
 	if err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
@@ -56,6 +62,10 @@ func (s *MaterialService) UpdateStatus(userID, id uint, role, status, fileURL st
 	m.Status = status
 	if fileURL != "" {
 		m.FileURL = fileURL
+	}
+	if status == constants.MaterialUploaded && m.UploadedAt == nil {
+		now := time.Now()
+		m.UploadedAt = &now
 	}
 	if err := s.repo.Update(m); err != nil {
 		return nil, fmt.Errorf("material status update: %w", err)
@@ -75,7 +85,8 @@ func (s *MaterialService) Progress(applicationID uint) (int, error) {
 	}
 	done := 0
 	for _, m := range items {
-		if m.Status == constants.MaterialPending || m.Status == constants.MaterialUploaded || m.Status == constants.MaterialApproved {
+		// Pending items are still waiting for upload and do not count as done.
+		if m.Status == constants.MaterialUploaded || m.Status == constants.MaterialApproved {
 			done++
 		}
 	}
