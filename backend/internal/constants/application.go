@@ -16,6 +16,7 @@ func ValidApplicationStatuses() []string {
 	return []string{
 		AppStatusPlanning, AppStatusPreparing, AppStatusSubmitted,
 		AppStatusWaiting, AppStatusAdmitted, AppStatusRejected,
+		AppStatusWaitlisted,
 	}
 }
 
@@ -37,9 +38,9 @@ func NextApplicationStatuses(s string) []string {
 	case AppStatusPreparing:
 		return []string{AppStatusSubmitted}
 	case AppStatusSubmitted:
-		return nil
+		return []string{AppStatusWaiting}
 	case AppStatusWaiting:
-		return []string{AppStatusAdmitted, AppStatusRejected}
+		return []string{AppStatusAdmitted, AppStatusRejected, AppStatusWaitlisted}
 	default:
 		return nil
 	}

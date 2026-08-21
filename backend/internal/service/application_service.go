@@ -29,6 +29,7 @@ func (s *ApplicationService) Create(studentID uint, a *model.ApplicationProject)
 		return nil, util.NewAppError(404, constants.CodeNotFound,
 			fmt.Sprintf("University[id=%d] not found", a.UniversityID))
 	}
+	a.StudentID = studentID
 	if a.Status == "" {
 		a.Status = constants.AppStatusPlanning
 	}
@@ -64,7 +65,14 @@ func (s *ApplicationService) UpdateStatus(id, userID uint, role, next string) (*
 	}
 	a, err := s.repo.FindByID(id)
 	if err != nil {
+		if errors.Is(err, repository.ErrNotFound) {
+			return nil, util.NewAppError(404, constants.CodeNotFound, fmt.Sprintf("ApplicationProject[id=%d] not found", id))
+		}
 		return nil, fmt.Errorf("application status find: %w", err)
+	}
+	if role == constants.RoleStudent && a.StudentID != userID {
+		return nil, util.NewAppError(403, constants.CodeForbidden,
+			fmt.Sprintf("ApplicationProject[id=%d] status change failed: user_id=%d not student owner", id, userID))
 	}
 	allowed := false
 	for _, s2 := range constants.NextApplicationStatuses(a.Status) {
@@ -90,7 +98,7 @@ func (s *ApplicationService) UpdateStatus(id, userID uint, role, next string) (*
 func (s *ApplicationService) List(userID uint, role string) ([]model.ApplicationProject, error) {
 	switch role {
 	case constants.RoleStudent:
-		return s.repo.ListAll()
+		return s.repo.ListByStudent(userID)
 	case constants.RoleCounselor:
 		return s.repo.ListByCounselor(userID)
 	default:
